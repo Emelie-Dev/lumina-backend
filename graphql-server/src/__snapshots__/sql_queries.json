@@ -1,4 +1,8 @@
 {
+  "getAccountTransactions_representative": {
+    "sql": "SELECT hash, network, ledger, created_at, source_account, fee_charged, operation_count, successful, memo_type, memo FROM transactions WHERE source_account = $1 AND network = $2 ORDER BY ledger DESC LIMIT $3",
+    "paramCount": 3
+  },
   "getAccounts_address_default": {
     "sql": "SELECT address, network, sequence, subentry_count, last_modified_ledger, num_sponsored, num_sponsoring, balances, flags, thresholds FROM accounts WHERE network = $1 ORDER BY address ASC LIMIT $2",
     "paramCount": 2

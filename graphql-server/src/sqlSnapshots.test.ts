@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import type { Pool } from 'pg';
 import {
   getTransactions,
+  getAccountTransactions,
   getOperations,
   getLedgers,
   getAccounts,
@@ -144,6 +145,23 @@ test('SQL snapshot: getTransactions ascending order', async () => {
   });
   const q = getLastQuery();
   verifySqlSnapshot('getTransactions_ascending', q.sql, q.params);
+});
+
+// ─── Account Transactions SQL Snapshots ──────────────────────────────────────
+
+test('SQL snapshot: getAccountTransactions representative arguments', async () => {
+  const { pool, getLastQuery } = fakePool();
+  const address = 'GBRPYHIL2CI537KXVHBV4Z6G7MXNGSQXN4F2XGJFFHJ3KJV3J4WKZQLQ';
+  await getAccountTransactions(pool, 'mainnet', address, 20);
+  const q = getLastQuery();
+
+  assert.deepEqual(q.params, [address, 'mainnet', 20]);
+  assert.match(q.sql, /WHERE source_account = \$1 AND network = \$2/);
+  assert.doesNotMatch(q.sql, /mainnet|GBRPYHIL2CI537KXVHBV4Z6G7MXNGSQXN4F2XGJFFHJ3KJV3J4WKZQLQ/i);
+  assert.doesNotMatch(q.sql, /\bOFFSET\b/i);
+  assert.match(q.sql, /\bLIMIT \$3\b/);
+
+  verifySqlSnapshot('getAccountTransactions_representative', q.sql, q.params);
 });
 
 // ─── Operations SQL Snapshots ────────────────────────────────────────────────
